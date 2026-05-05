@@ -1,7 +1,7 @@
 <?php
     // In a real scenario, this name might come from a Database or Session
     $user_name = "Ali Hadeed";
-    $title = "Mr ";
+    $title = "Mr. ";
 ?>
 <!DOCTYPE html>
 <html lang="en">
