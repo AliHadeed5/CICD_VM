@@ -19,54 +19,27 @@ on:
 # -------------------------------------------------------------------------
 jobs:
 
-  # JOB 1: Continuous Integration (Testing Phase)
-  test-and-validate:
-    runs-on: ubuntu-latest # The environment/runner machine provided by GitHub
+  # JOB: Simple Deployment Phase
+  deploy-to-server:
+    runs-on: ubuntu-latest
 
-    # TASKS / STEPS: Sequential items executed step-by-step inside this job.
+    # TASKS / STEPS: Sequential items executed step-by-step.
     steps:
       
-      # ACTION: A reusable piece of code written by GitHub to pull down code.
+      # ACTION: Pulls down your simple PHP file onto the GitHub runner.
       - name: Checkout Code Repository
         uses: actions/checkout@v4
 
-      # ACTION: A specialized community action to set up the PHP runtime.
-      - name: Setup PHP Runtime Environment
-        uses: shivamathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: mbstring, xml, ctype, iconv, mysql
-          coverage: none
-
-      # TASK: Running standard shell commands to install vendor dependencies.
-      - name: Install Composer Dependencies
-        run: composer install --no-progress --prefer-dist --optimize-autoloader
-
-      # TASK: Running standard shell commands to run your automated test suite.
-      - name: Execute PHPUnit Test Suite
-        run: vendor/bin/phpunit
-
-
-  # JOB 2: Continuous Delivery & Deployment Phase
-  deploy-to-server:
-    runs-on: ubuntu-latest
-    needs: test-and-validate # PIPELINE LOGIC: Job 2 won't start unless Job 1 succeeds
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push' # PIPELINE LOGIC: Only deploys on actual merges to main
-
-    steps:
-      
-      # ACTION: Reusable community action that sets up SSH connection and executes commands remotely.
+      # ACTION: Connects securely to your server and pulls the changes.
       - name: Execute Remote SSH Deployment Commands
         uses: appleboy/ssh-action@v1.0.3
         with:
-          # Pulling encrypted values securely from your GitHub Repository Secrets
           host: ${{ secrets.SERVER_IP }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          username: ${{ secrets.USER_NAME }} # <-- Change this to your server's user account (e.g., root, www-data)
+          username: ${{secrets.USER_NAME}} # <-- Double check if your server user is ubuntu, root, or something else
           
-          # TASK: The actual terminal commands that will run inside your remote server
+          # TASK: Commands executed directly inside your remote server terminal
           script: |
             cd /var/www/html/alihadeed/
             git pull origin main
-            composer install --no-dev --optimize-autoloader
-            echo "Deployment successful!"
+            echo "Successfully pulled the latest PHP file!"
